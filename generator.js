@@ -217,7 +217,7 @@ function generateFontFilesForPlatform(platform, prefix, classType, callback)
     header += output;
     header += "</resources>";
 
-    var filename = (parsingFont ? "Fonts.xml" : "Colors.xml");
+    var filename = (parsingFont ? "text_styles.xml" : "colors.xml");
     var mPath = getDocumentPath() + filename;
     saveFile(mPath, header);
   }
@@ -266,10 +266,19 @@ function generateFontiOS(layer)
 function generateFontAndroid(layer)
 {
   var output = newLine;
-  output = "  <item name=\"typeface\">"+layer.fontPostscriptName()+".ttf</item>";
+  var parts = layer.name().split("_");
+
+  output = "  <item name=\"android:textColor\">@color/" + parts[1] + "</item>";
   output += newLine;
-  output += "  <item name=\"android:textSize\">"+layer.fontSize()+"sp</item>";
+  output += "  <item name=\"android:textSize\">" + layer.fontSize() + "sp</item>";
   output += newLine;
+
+  if (parts.length > 2) {
+    if (parts[2] == "uppercase") {
+      output += "  <item name=\"android:textAllCaps\">true</item>";
+      output += newLine;
+    }
+  }
 
   log(output);
 
