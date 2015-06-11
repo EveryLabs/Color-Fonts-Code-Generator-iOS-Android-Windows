@@ -53,11 +53,11 @@ function generateLineForPlatform(methodName, codeSignature, platform, output, me
   {
     output += methodName;
     output += newLine;
-    output += "{";
+    output += "    {";
     output += newLine;
     output += codeSignature;
     output += newLine;
-    output += "}";    
+    output += "    }";    
     output += newLine;  
     output += newLine;  
   } 
@@ -79,6 +79,7 @@ var main = this;
 function generateFontFilesForPlatform(platform, prefix, classType, callback)
 {
   var methodSignatures = [];
+  var methodSwitch = [];
   var codes = [];
   var output = '';
 
@@ -113,10 +114,15 @@ function generateFontFilesForPlatform(platform, prefix, classType, callback)
         {
           swatchName = makeNiceName(swatchName);
 
-          var methodName = generateMethodSignature(classType, swatchName, prefix);            
+          var methodName = generateMethodSignature(classType, swatchName, prefix, parsingFont);            
           methodSignatures.push(methodName);
+          
+          var nameSwitch = generateSwitchCase(swatchName, prefix)
+          methodSwitch.push(nameSwitch)
+          
           // 
-          var codeSignature = callback(layer)
+          var fontColor = swatchName.split("_")[1]
+          var codeSignature = callback(layer).replace("{fontColor}", prefix+fontColor)
           output = generateLineForPlatform(methodName, codeSignature, platform, output, callback);
 
           if(!parsingFont)
@@ -176,32 +182,23 @@ function generateFontFilesForPlatform(platform, prefix, classType, callback)
   // BIG IF STATEMENT HERE FOR PLATFORM
   if (isIOS) 
   {
-    var mPrefix  = "#import \""+classType+"+Sketch.h\"";
-    mPrefix += newLine;
-    mPrefix += newLine;
-    mPrefix += "@implementation "+classType+" (Sketch)";
-    mPrefix += newLine;
-    mPrefix += newLine;
-    mPrefix += output;
-    mPrefix += newLine;
-    mPrefix += "@end";
+    var swiftPrefix  = "import UIKit";
+    swiftPrefix += newLine;
+    swiftPrefix += newLine;
+    swiftPrefix += "extension "+classType;
+    swiftPrefix += newLine;
+    swiftPrefix += "{";
+    swiftPrefix += newLine;
+    swiftPrefix += newLine;
+    swiftPrefix += output;
+    swiftPrefix += newLine;
+    swiftPrefix += newLine;
+    swiftPrefix += generateNameSwitch(parsingFont,methodSwitch);
+    swiftPrefix += "}";
 
-    var hPrefix  = "#import <UIKit/UIKit.h>";
-    hPrefix += newLine;
-    hPrefix += newLine;
-    hPrefix += "@interface "+classType+" (Sketch)";
-    hPrefix += newLine;
-    hPrefix += newLine;
-    hPrefix += methodSignatures.join(newLine);
-    hPrefix += newLine;
-    hPrefix += newLine;
-    hPrefix += "@end";
+    var swiftPath = getDocumentPath() + classType + "+(Sketch).swift";
 
-    var mPath = getDocumentPath() + classType + "+Sketch.m";
-    var hPath = getDocumentPath() + classType + "+Sketch.h";
-
-    saveFile(mPath, mPrefix);
-    saveFile(hPath, hPrefix);
+    saveFile(swiftPath, swiftPrefix);
 
     //save the file
     if(!parsingFont)
@@ -253,14 +250,64 @@ function getSwatchLayer(name)
   return [swatchPage layers];
 }
 
-function generateMethodSignature(className, name, prefix)
+function generateMethodSignature(className, name, prefix, parsingFont)
 {
-    return "+ ("+className+" *)" + prefix + name;
+	if(parsingFont)
+	{
+    	return "    class func "+ prefix + name +"() -> (font : UIFont, lineHeight : Float, fontColor : UIColor)";
+	}
+	else
+	{
+		return "    class func "+ prefix + name +"() -> "+className;
+	}
+}
+function generateNameSwitch(parsingFont, switchCases)
+{
+	var switchStatement = newLine
+	if(parsingFont)
+	{
+		switchStatement = "    class func fontStyleByName(name : String) -> (font : UIFont, lineHeight : Float, fontColor : UIColor)?";		
+	}
+	else
+	{
+		switchStatement = "    class func colorByName(name : String) -> UIColor";		
+	}
+	switchStatement += newLine;
+	switchStatement += "    {";
+	switchStatement += newLine;
+	switchStatement += "        switch(name)";
+	switchStatement += newLine;
+	switchStatement += "        {";
+	switchStatement += newLine;
+	switchStatement += switchCases.join(newLine);
+	switchStatement += newLine;
+	switchStatement += "        default:";
+	switchStatement += newLine;
+	if(!parsingFont)
+	{
+		
+		switchStatement += "            return UIColor.blackColor()";
+	}
+	else
+	{
+		switchStatement += "            return nil";
+	}
+	switchStatement += newLine;
+	switchStatement += "        }";
+	switchStatement += newLine;
+	switchStatement += "    }";
+	switchStatement += newLine;
+	
+	return switchStatement;
+}
+function generateSwitchCase(name, prefix)
+{
+    	return "        case \""+ prefix + name +"\":" +newLine + "            return "+ prefix + name+"()";
 }
 
 function generateFontiOS(layer)
-{
-  return "  return [UIFont fontWithName:@\"" + layer.fontPostscriptName() + "\" size:" + layer.fontSize() + ".f];";
+{	
+  return "        return (UIFont(name: \"" + layer.fontPostscriptName() + "\", size:" + layer.fontSize() + ")!, "+layer.lineSpacing()+", UIColor.{fontColor}())";
 }
 
 function generateFontAndroid(layer)
@@ -304,7 +351,7 @@ function generateColoriOS(layer)
   var blue = fill.color().blue().toFixed(3).toString();
   var alpha = fill.color().alpha().toFixed(3).toString();
 
-  return "  return [UIColor colorWithRed:" + red + " green:" + green + " blue:" + blue + " alpha:" + alpha + "];";
+  return "        return UIColor(red: " + red + ", green: " + green + ", blue: " + blue + ", alpha: " + alpha + ")";
 }
 
 function generateColorAndroid(layer)

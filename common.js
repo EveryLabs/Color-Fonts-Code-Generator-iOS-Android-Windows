@@ -86,7 +86,7 @@ function makeNiceName(str)
     var result;
 
     // make title case
-    result = str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1);});
+    result = str.replace(/\w\S*/g, function(txt){return txt.charAt(0) + txt.substr(1);});
 
     // strip spaces from layer names
     result = result.replace(/ /g,'');

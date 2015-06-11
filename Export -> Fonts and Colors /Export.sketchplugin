@@ -15,7 +15,7 @@ if (choice[1] == 0)
 {
 	// ask user for class prefix
 
-	name = [doc askForUserInput:"Class Prefix?" initialValue:"SK_"]
+	name = [doc askForUserInput:"Class Prefix?" initialValue:"EL_"]
 }
 
 // lets generate our stuff
