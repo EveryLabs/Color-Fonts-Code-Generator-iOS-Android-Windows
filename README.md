@@ -13,8 +13,8 @@ UIFont+Sketch.h<br>
 UIFont+Sketch.m<br>
 
 #For Android
-Colors.xml<br>
-Fonts.xml<br>
+colors.xml<br>
+text_styles.xml<br>
 
 #For Windows
 Colors.xaml<br>
