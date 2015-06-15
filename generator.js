@@ -63,7 +63,7 @@ function generateLineForPlatform(methodName, codeSignature, platform, output, me
   } 
   else if (platform == 1)
   {
-      output += "<style name=\""+methodName+"\" parent=\"@android:style/TextAppearance\">";   
+      output += "    <style name=\""+methodName+"\" parent=\"@android:style/TextAppearance\">";
   }
 
     return output;
@@ -139,10 +139,10 @@ function generateFontFilesForPlatform(platform, prefix, classType, callback)
 
           if (parsingFont)
           {
-            output += "<style name=\""+swatchName+"\" parent=\"@android:style/TextAppearance\">";
+            output += "    <style name=\""+swatchName+"\" parent=\"@android:style/TextAppearance\">";
             output += newLine;
             output += callback(layer);
-            output += "</style>";
+            output += "    </style>";
             output += newLine;
             output += newLine;  
           }
@@ -315,14 +315,20 @@ function generateFontAndroid(layer)
   var output = newLine;
   var parts = layer.name().split("_");
 
-  output = "  <item name=\"android:textColor\">@color/" + parts[1] + "</item>";
+  output = "        <item name=\"android:textColor\">@color/" + parts[1] + "</item>";
   output += newLine;
-  output += "  <item name=\"android:textSize\">" + layer.fontSize() + "sp</item>";
+  output += "        <item name=\"android:textSize\">" + layer.fontSize() + "sp</item>";
   output += newLine;
+
+  if (layer.fontPostscriptName() == "Roboto-Medium") {
+    output += "        <item name=\"android:fontFamily\">@string/font-family-medium</item>";
+    output += newLine;
+  }
+
 
   if (parts.length > 2) {
     if (parts[2] == "uppercase") {
-      output += "  <item name=\"android:textAllCaps\">true</item>";
+      output += "        <item name=\"android:textAllCaps\">true</item>";
       output += newLine;
     }
   }
@@ -362,7 +368,7 @@ function generateColorAndroid(layer)
   var blue = parseInt((fill.color().blue().toFixed(3) * 255).toFixed(0));
   var alpha = parseInt((fill.color().alpha().toFixed(3) * 255).toFixed(0));
 
-  return  "<color name=\"{template}\">#"+rgba2hex(red,green,blue,alpha)+"</color>";
+  return  "    <color name=\"{template}\">#"+rgba2hex(red,green,blue,alpha)+"</color>";
   
 }
 
