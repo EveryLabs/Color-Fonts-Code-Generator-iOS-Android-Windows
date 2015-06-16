@@ -321,7 +321,7 @@ function generateFontAndroid(layer)
   output += newLine;
 
   if (layer.fontPostscriptName() == "Roboto-Medium") {
-    output += "        <item name=\"android:fontFamily\">@string/font-family-medium</item>";
+    output += "        <item name=\"android:fontFamily\">@string/font_family_medium</item>";
     output += newLine;
   }
 
