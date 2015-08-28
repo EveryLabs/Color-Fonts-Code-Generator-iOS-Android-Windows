@@ -63,7 +63,7 @@ function generateLineForPlatform(methodName, codeSignature, platform, output, me
   } 
   else if (platform == 1)
   {
-      output += "    <style name=\""+methodName+"\" parent=\"@android:style/TextAppearance\">";
+      output += "    <style name=\""+methodName+"\" parent=\"TextAppearance.AppCompat\">";
   }
 
     return output;
@@ -139,7 +139,7 @@ function generateFontFilesForPlatform(platform, prefix, classType, callback)
 
           if (parsingFont)
           {
-            output += "    <style name=\""+swatchName+"\" parent=\"@android:style/TextAppearance\">";
+            output += "    <style name=\""+swatchName+"\" parent=\"TextAppearance.AppCompat\">";
             output += newLine;
             output += callback(layer);
             output += "    </style>";
